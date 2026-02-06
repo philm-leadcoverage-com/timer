@@ -76,6 +76,7 @@
 
         const wantsDown = q.has("to_date");
         const wantsUp   = q.has("from_date");
+        const showSeconds = q.get("show_seconds")?.toUpperCase() === "TRUE";
 
         setInterval(() => {
           const now = Date.now();
@@ -103,8 +104,8 @@
 
           el.textContent =
             (lead.length ? lead.join(", ") + ", " : "") +
-            `${hours}:${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
-        }, 1000);
+            `${hours}:${String(mins).padStart(2,"0")}` +
+            (showSeconds ? `:${String(secs).padStart(2,"0")}` : "");
 
       } catch (e) {
         el.textContent = "Timer error: " + e;
