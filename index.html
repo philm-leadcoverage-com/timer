@@ -1,31 +1,56 @@
 <script>
 const el = document.getElementById("t");
-const q  = new URLSearchParams(location.search);
-const k  = (q.get("to_date") || q.get("from_date") || "")
-  .split("-").map(Number);
 
-const d = new Date(k[0],k[1]-1,k[2],k[3],k[4],k[5]).getTime();
-const down = q.has("to_date");
+try {
+  const q = new URLSearchParams(location.search);
+  const raw = q.get("to_date") || q.get("from_date");
+  if (!raw) throw "Missing to_date or from_date";
 
-setInterval(() => {
-  let s = down
-    ? Math.max(0, Math.floor((d - Date.now()) / 1000))
-    : Math.floor((Date.now() - d) / 1000);
+  const k = raw.split("-").map(Number);
+  if (k.length !== 6 || k.some(Number.isNaN))
+    throw "Bad date format";
 
-  const years  = Math.floor(s / 31536000); s %= 31536000;
-  const months = Math.floor(s / 2592000);  s %= 2592000;
-  const days   = Math.floor(s / 86400);    s %= 86400;
-  const hours  = Math.floor(s / 3600);     s %= 3600;
-  const mins   = Math.floor(s / 60);
-  const secs   = s % 60;
+  const d = new Date(k[0], k[1]-1, k[2], k[3], k[4], k[5]).getTime();
+  if (!Number.isFinite(d)) throw "Invalid date";
 
-  let left = [];
-  if (years)  left.push(`${years} years`);
-  if (months) left.push(`${months} months`);
-  if (days)   left.push(`${days} days`);
+  const wantsDown = q.has("to_date");
+  const wantsUp   = q.has("from_date");
 
-  el.textContent =
-    (left.length ? left.join(", ") + ", " : "") +
-    `${hours}:${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
-}, 1000);
+  setInterval(() => {
+    const now = Date.now();
+    let s;
+
+    // Auto-direction correction
+    if (wantsDown && d < now) {
+      // to_date in past → count up
+      s = Math.floor((now - d) / 1000);
+    } else if (wantsUp && d > now) {
+      // from_date in future → count down
+      s = Math.max(0, Math.floor((d - now) / 1000));
+    } else if (wantsDown) {
+      s = Math.max(0, Math.floor((d - now) / 1000));
+    } else {
+      s = Math.floor((now - d) / 1000);
+    }
+
+    const years  = Math.floor(s / 31536000); s %= 31536000;
+    const months = Math.floor(s / 2592000);  s %= 2592000;
+    const days   = Math.floor(s / 86400);    s %= 86400;
+    const hours  = Math.floor(s / 3600);     s %= 3600;
+    const mins   = Math.floor(s / 60);
+    const secs   = s % 60;
+
+    const left = [];
+    if (years)  left.push(`${years} years`);
+    if (months) left.push(`${months} months`);
+    if (days)   left.push(`${days} days`);
+
+    el.textContent =
+      (left.length ? left.join(", ") + ", " : "") +
+      `${hours}:${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
+  }, 1000);
+
+} catch (e) {
+  el.textContent = "Timer error: " + e;
+}
 </script>
