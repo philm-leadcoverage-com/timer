@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Timer</title>
+
+<div id="t" style="font:64px system-ui;text-align:center"></div>
+
+<script>
+const q=new URLSearchParams(location.search);
+const k=(q.get("to_date")||q.get("from_date")||"")
+  .split("-").map(Number);
+const d=new Date(k[0],k[1]-1,k[2],k[3],k[4],k[5]).getTime();
+const down=q.has("to_date");
+
+setInterval(()=>{
+  let s=Math.floor((d-Date.now())/1000);
+  if(!down) s=Math.floor((Date.now()-d)/1000);
+  if(down) s=Math.max(0,s);
+  t.textContent=
+  `${Math.floor(s/3600)}:${String(Math.floor(s/60)%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+},1000);
+</script>
