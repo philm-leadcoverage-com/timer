@@ -1,57 +1,116 @@
-<script>
-document.getElementById("t").textContent = "JS LOADED";
-const el = document.getElementById("t");
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Timer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-try {
-  const q = new URLSearchParams(location.search);
-  const raw = q.get("to_date") || q.get("from_date");
-  if (!raw) throw "Missing to_date or from_date";
-
-  const k = raw.split("-").map(Number);
-  if (k.length !== 6 || k.some(Number.isNaN))
-    throw "Bad date format";
-
-  const d = new Date(k[0], k[1]-1, k[2], k[3], k[4], k[5]).getTime();
-  if (!Number.isFinite(d)) throw "Invalid date";
-
-  const wantsDown = q.has("to_date");
-  const wantsUp   = q.has("from_date");
-
-  setInterval(() => {
-    const now = Date.now();
-    let s;
-
-    // Auto-direction correction
-    if (wantsDown && d < now) {
-      // to_date in past → count up
-      s = Math.floor((now - d) / 1000);
-    } else if (wantsUp && d > now) {
-      // from_date in future → count down
-      s = Math.max(0, Math.floor((d - now) / 1000));
-    } else if (wantsDown) {
-      s = Math.max(0, Math.floor((d - now) / 1000));
-    } else {
-      s = Math.floor((now - d) / 1000);
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: #fff;
+      color: #111;
     }
 
-    const years  = Math.floor(s / 31536000); s %= 31536000;
-    const months = Math.floor(s / 2592000);  s %= 2592000;
-    const days   = Math.floor(s / 86400);    s %= 86400;
-    const hours  = Math.floor(s / 3600);     s %= 3600;
-    const mins   = Math.floor(s / 60);
-    const secs   = s % 60;
+    .frame {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-    const left = [];
-    if (years)  left.push(`${years} years`);
-    if (months) left.push(`${months} months`);
-    if (days)   left.push(`${days} days`);
+    .card {
+      padding: 32px 40px;
+      border-radius: 12px;
+      background: #f7f7f7;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+      text-align: center;
+      min-width: 320px;
+    }
 
-    el.textContent =
-      (left.length ? left.join(", ") + ", " : "") +
-      `${hours}:${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
-  }, 1000);
+    .label {
+      font-size: 14px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 12px;
+    }
 
-} catch (e) {
-  el.textContent = "Timer error: " + e;
-}
-</script>
+    #t {
+      font-size: 48px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="frame">
+    <div class="card">
+      <div class="label">Elapsed Time</div>
+      <div id="t">Loading…</div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const el = document.getElementById("t");
+
+      try {
+        const q = new URLSearchParams(location.search);
+        const raw = q.get("to_date") || q.get("from_date");
+        if (!raw) throw "Missing to_date or from_date";
+
+        const k = raw.split("-").map(Number);
+        if (k.length !== 6 || k.some(Number.isNaN))
+          throw "Bad date format";
+
+        const d = new Date(
+          k[0], k[1] - 1, k[2], k[3], k[4], k[5]
+        ).getTime();
+
+        if (!Number.isFinite(d)) throw "Invalid date";
+
+        const wantsDown = q.has("to_date");
+        const wantsUp   = q.has("from_date");
+
+        setInterval(() => {
+          const now = Date.now();
+          let s;
+
+          if (wantsDown && d < now) {
+            s = Math.floor((now - d) / 1000);
+          } else if (wantsUp && d > now) {
+            s = Math.max(0, Math.floor((d - now) / 1000));
+          } else if (wantsDown) {
+            s = Math.max(0, Math.floor((d - now) / 1000));
+          } else {
+            s = Math.floor((now - d) / 1000);
+          }
+
+          const years  = Math.floor(s / 31536000); s %= 31536000;
+          const months = Math.floor(s / 2592000);  s %= 2592000;
+          const days   = Math.floor(s / 86400);    s %= 86400;
+          const hours  = Math.floor(s / 3600);     s %= 3600;
+          const mins   = Math.floor(s / 60);
+          const secs   = s % 60;
+
+          const lead = [];
+          if (years)  lead.push(`${years} years`);
+          if (months) lead.push(`${months} months`);
+          if (days)   lead.push(`${days} days`);
+
+          el.textContent =
+            (lead.length ? lead.join(", ") + ", " : "") +
+            `${hours}:${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
+        }, 1000);
+
+      } catch (e) {
+        el.textContent = "Timer error: " + e;
+      }
+    });
+  </script>
+</body>
+</html>
