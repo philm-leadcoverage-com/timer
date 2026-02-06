@@ -15,7 +15,8 @@
     }
 
     .frame {
-      height: 100%;
+      width: 400px;
+      height: 100px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -49,7 +50,7 @@
 <body>
   <div class="frame">
     <div class="card">
-      <div class="label">Elapsed Time</div>
+      <div class="label">Time</div>
       <div id="t">Loading…</div>
     </div>
   </div>
@@ -80,14 +81,12 @@
           const now = Date.now();
           let s;
 
-          if (wantsDown && d < now) {
-            s = Math.floor((now - d) / 1000);
-          } else if (wantsUp && d > now) {
-            s = Math.max(0, Math.floor((d - now) / 1000));
-          } else if (wantsDown) {
+          if (wantsDown) {
+            // Countdown: show remaining time (0 if already passed)
             s = Math.max(0, Math.floor((d - now) / 1000));
           } else {
-            s = Math.floor((now - d) / 1000);
+            // Count up: show elapsed time (0 if still in future)
+            s = Math.max(0, Math.floor((now - d) / 1000));
           }
 
           const years  = Math.floor(s / 31536000); s %= 31536000;
