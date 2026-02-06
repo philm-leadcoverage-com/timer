@@ -83,14 +83,16 @@
           const hours  = Math.floor(s / 3600);     s %= 3600;
           const mins   = Math.floor(s / 60);
           const secs   = s % 60;
-          const lead = [];
-          if (years)  lead.push(`${years} years`);
-          if (months) lead.push(`${months} months`);
-          if (days)   lead.push(`${days} days`);
-          el.textContent =
-            (lead.length ? lead.join(", ") + ", " : "") +
-            `${hours}:${String(mins).padStart(2,"0")}` +
-            (showSeconds ? `:${String(secs).padStart(2,"0")}` : "");
+          
+          const parts = [];
+          if (years)  parts.push(`${years} years`);
+          if (months) parts.push(`${months} months`);
+          if (days)   parts.push(`${days} days`);
+          if (hours)  parts.push(`${hours} hours`);
+          if (mins)   parts.push(`${mins} minutes`);
+          if (showSeconds && secs) parts.push(`${secs} seconds`);
+          
+          el.textContent = parts.join(", ");
         };
         
         update();
