@@ -1,28 +1,45 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Timer</title>
+
+<div id="t" style="font:64px system-ui;text-align:center"></div>
+
 <script>
-const q=new URLSearchParams(location.search);
-const p=(q.get("to_date")||q.get("from_date")||"").split("-").map(Number);
-const d=new Date(p[0],p[1]-1,p[2],p[3],p[4],p[5]).getTime();
-const down=q.has("to_date");
+const el = document.getElementById("t");
+const q  = new URLSearchParams(location.search);
 
-setInterval(()=>{
-  let s=down
-    ? Math.max(0,Math.floor((d-Date.now())/1000))
-    : Math.max(0,Math.floor((Date.now()-d)/1000));
+const raw = q.get("to_date") || q.get("from_date") || "";
+const parts = raw.split("-").map(x => Number(x));
+const down = q.has("to_date");
 
-  const Y=Math.floor(s/31536000); s%=31536000;
-  const M=Math.floor(s/2592000);  s%=2592000;
-  const D=Math.floor(s/86400);    s%=86400;
-  const H=Math.floor(s/3600);     s%=3600;
-  const m=Math.floor(s/60);
-  const S=s%60;
+if (parts.length !== 6 || parts.some(n => Number.isNaN(n))) {
+  el.textContent = "Missing/invalid to_date or from_date";
+} else {
+  const d = new Date(parts[0], parts[1]-1, parts[2], parts[3], parts[4], parts[5]).getTime();
+  if (!Number.isFinite(d)) {
+    el.textContent = "Invalid date";
+  } else {
+    setInterval(() => {
+      let s = down
+        ? Math.max(0, Math.floor((d - Date.now()) / 1000))
+        : Math.max(0, Math.floor((Date.now() - d) / 1000));
 
-  let parts=[];
-  if(Y) parts.push(String(Y).padStart(4,'0'));
-  if(M||parts.length) parts.push(String(M).padStart(2,'0'));
-  if(D||parts.length) parts.push(String(D).padStart(2,'0'));
+      const Y = Math.floor(s / 31536000); s %= 31536000; // 365d years
+      const M = Math.floor(s / 2592000);  s %= 2592000;  // 30d months
+      const D = Math.floor(s / 86400);    s %= 86400;
+      const H = Math.floor(s / 3600);     s %= 3600;
+      const m = Math.floor(s / 60);
+      const S = s % 60;
 
-  t.textContent=
-    (parts.length?parts.join(":")+" ":"")+
-    `${String(H).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(S).padStart(2,'0')}`;
-},1000);
+      const left = [];
+      if (Y) left.push(String(Y).padStart(4, "0"));
+      if (M || left.length) left.push(String(M).padStart(2, "0"));
+      if (D || left.length) left.push(String(D).padStart(2, "0"));
+
+      el.textContent =
+        (left.length ? left.join(":") + " " : "") +
+        `${String(H).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(S).padStart(2,"0")}`;
+    }, 250);
+  }
+}
 </script>
