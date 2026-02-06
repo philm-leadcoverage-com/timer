@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <title>Timer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <style>
     html, body {
       height: 100%;
@@ -13,7 +12,6 @@
       background: #fff;
       color: #111;
     }
-
     .frame {
       width: 400px;
       height: 100px;
@@ -21,7 +19,6 @@
       align-items: center;
       justify-content: center;
     }
-
     .card {
       padding: 32px 40px;
       border-radius: 12px;
@@ -30,7 +27,6 @@
       text-align: center;
       min-width: 320px;
     }
-
     .label {
       font-size: 14px;
       letter-spacing: .08em;
@@ -38,7 +34,6 @@
       color: #666;
       margin-bottom: 12px;
     }
-
     #t {
       font-size: 48px;
       font-weight: 600;
@@ -46,7 +41,6 @@
     }
   </style>
 </head>
-
 <body>
   <div class="frame">
     <div class="card">
@@ -54,34 +48,28 @@
       <div id="t">Loading…</div>
     </div>
   </div>
-
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const el = document.getElementById("t");
-
       try {
         const q = new URLSearchParams(location.search);
         const raw = q.get("to_date") || q.get("from_date");
         if (!raw) throw "Missing to_date or from_date";
-
         const k = raw.split("-").map(Number);
         if (k.length !== 6 || k.some(Number.isNaN))
           throw "Bad date format";
-
         const d = new Date(
           k[0], k[1] - 1, k[2], k[3], k[4], k[5]
         ).getTime();
-
         if (!Number.isFinite(d)) throw "Invalid date";
-
+        
         const wantsDown = q.has("to_date");
-        const wantsUp   = q.has("from_date");
+        const wantsUp = q.has("from_date");
         const showSeconds = q.get("show_seconds")?.toUpperCase() === "TRUE";
-
-        setInterval(() => {
+        
+        const update = () => {
           const now = Date.now();
           let s;
-
           if (wantsDown) {
             // Countdown: show remaining time (0 if already passed)
             s = Math.max(0, Math.floor((d - now) / 1000));
@@ -89,24 +77,25 @@
             // Count up: show elapsed time (0 if still in future)
             s = Math.max(0, Math.floor((now - d) / 1000));
           }
-
           const years  = Math.floor(s / 31536000); s %= 31536000;
           const months = Math.floor(s / 2592000);  s %= 2592000;
           const days   = Math.floor(s / 86400);    s %= 86400;
           const hours  = Math.floor(s / 3600);     s %= 3600;
           const mins   = Math.floor(s / 60);
           const secs   = s % 60;
-
           const lead = [];
           if (years)  lead.push(`${years} years`);
           if (months) lead.push(`${months} months`);
           if (days)   lead.push(`${days} days`);
-
           el.textContent =
             (lead.length ? lead.join(", ") + ", " : "") +
             `${hours}:${String(mins).padStart(2,"0")}` +
             (showSeconds ? `:${String(secs).padStart(2,"0")}` : "");
-
+        };
+        
+        update();
+        setInterval(update, 1000);
+        
       } catch (e) {
         el.textContent = "Timer error: " + e;
       }
