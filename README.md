@@ -4,10 +4,10 @@ A simple, embeddable countdown/countup timer that displays time in a clean, read
 
 ## Features
 
-- **Countdown Mode**: Count down to a future date
-- **Count Up Mode**: Count up from a past date
-- **Flexible Display**: Show or hide seconds
-- **Clean Design**: Minimal 400px × 100px frame
+- **Countdown Mode**: Count down to a future date,
+- **Count Up Mode**: Count up from a past date,
+- **Flexible Display**: Show or hide seconds,
+- **Clean Design**: Minimal 400px × 100px frame,
 - **URL-Configured**: All settings via query parameters
 
 ## Usage
